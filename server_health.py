@@ -1,4 +1,5 @@
 import psutil
+import os
 import socket
 from datetime import datetime
 
@@ -44,7 +45,7 @@ print("CPU Usage:", cpu_usage, "%")
 print("RAM Usage:", ram_usage, "%")
 print("Disk_Usage", disk_usage, "%")
 
-
+os.makedirs("logs", exist_ok=True)
 with open("logs/server_health.log", "a") as log_file:
     log_file.write("\n===== SERVER HEALTH REPORT =====\n")
     log_file.write(f"Timestamp: {timestamp}\n")
