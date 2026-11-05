@@ -153,3 +153,89 @@ Develop practical Linux system administration skills by managing users, groups, 
 - Linux troubleshooting
 
 **Lab Status:** Core administration exercises completed; final verification of the cron schedule and Python monitoring dependency remains.
+
+## Lab 4: Linux Networking & Troubleshooting
+
+### Objective
+
+Build practical Linux networking troubleshooting skills by inspecting interface configuration, routing, DNS, connectivity, link status, packet counters, system logs, and DHCP behavior. Practice controlled network failure and recovery.
+
+### Environment
+
+- Ubuntu Server running in Oracle VirtualBox
+- VirtualBox NAT networking
+- Interface: `enp0s3`
+- Network manager: `systemd-networkd` (Netplan-generated configuration)
+- Virtual NIC: Intel E1000 emulation
+
+### Network Configuration
+
+- IPv4 address: `10.0.2.15/24` (DHCP)
+- Default gateway: `10.0.2.2`
+- DNS server: `10.0.2.3`
+- Local DNS stub resolver: `127.0.0.53`
+- MTU: `1500`
+- Reported link: `1 Gbps, full duplex`
+
+### Connectivity and Routing
+
+- Inspected interface addresses using `ip`.
+- Reviewed the routing table and default gateway using `ip route`.
+- Tested gateway and external IP reachability with `ping`.
+- Confirmed external HTTPS connectivity using `curl -I`.
+- Used `tracepath` to inspect the route toward an external IP; the VirtualBox gateway responded, while later hops did not reply.
+- Resolved external hostnames successfully.
+
+### DNS Troubleshooting
+
+- Inspected resolver configuration using `resolvectl` and `/etc/resolv.conf`.
+- Verified that `systemd-resolved` was active and using the VirtualBox-provided DNS server.
+- Queried DNS with `getent` and `dig`.
+- Simulated a DNS outage by temporarily assigning an unreachable test resolver to `enp0s3`.
+- Confirmed that DNS lookups stalled while direct IP connectivity remained available.
+- Restored the original per-link DNS configuration with `resolvectl revert` and verified name resolution and HTTPS access.
+
+### Interface and Link Diagnostics
+
+- Inspected interface state, MAC address, MTU, and packet counters using `ip -s link`.
+- Used `ethtool` to inspect link detection, speed, duplex, and auto-negotiation.
+- Confirmed the interface reported `UP` and `LOWER_UP`, with zero RX/TX errors and drops at the time of inspection.
+- Reviewed kernel messages with `journalctl -k`.
+
+### DHCP and Recovery
+
+- Identified `systemd-networkd` as the network manager handling the interface.
+- Inspected DHCP-provided address, gateway, and DNS settings with `networkctl status`.
+- Reviewed network logs and observed a link-down event, carrier loss, DHCP lease loss, and subsequent link recovery with DHCP address reacquisition.
+- Renewed the DHCP configuration using `networkctl renew enp0s3`.
+- Verified that the interface retained its dynamic IPv4 configuration.
+
+### Troubleshooting and Recovery Lessons
+
+- Disabling the active network interface interrupted the SSH session, demonstrating the need for console or out-of-band access before disruptive remote changes.
+- Distinguished DNS resolution failure from loss of IP connectivity.
+- Reviewed APIPA (`169.254.0.0/16`) as an indicator that a client may have failed to obtain a DHCPv4 lease.
+- Practiced a troubleshooting sequence covering link state, VLAN/L2 connectivity, DHCP service and scope, and DHCP relay where applicable.
+
+### Technologies and Commands
+
+- Ubuntu Server
+- Netplan and systemd-networkd
+- systemd-resolved
+- DHCP, IPv4, IPv6, DNS
+- `ip`, `networkctl`, `resolvectl`, `ethtool`
+- `ping`, `tracepath`, `dig`, `getent`, `curl`
+- `journalctl`
+- VirtualBox NAT networking
+
+### Skills Demonstrated
+
+- Linux network configuration inspection
+- IP addressing and routing analysis
+- DNS troubleshooting and recovery
+- DHCP configuration inspection and renewal
+- Network interface and link diagnostics
+- Packet counter and system log analysis
+- Remote-access risk awareness and recovery planning
+
+**Lab Status:** Networking diagnostics, controlled DNS failure/recovery, interface recovery, and DHCP renewal exercises completed. Final connectivity verification passed.
